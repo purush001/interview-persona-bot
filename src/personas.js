@@ -2,6 +2,7 @@
 export const personas = [
   {
     id: 'pm',
+    quizTopics: ['Mixed', 'Product sense', 'Metrics & evals', 'LLM product strategy', 'Responsible AI', 'Go-to-market & pricing'],
     label: 'AI Product Manager',
     short: 'AI PM',
     theme: { accent: '#b57bff', accent2: '#ff4fd8', bg1: '#1b1060', bg2: '#0a1a6e' },
@@ -19,6 +20,7 @@ Behaviour: When the user asks for a mock interview, play the interviewer: ask ON
   },
   {
     id: 'fde',
+    quizTopics: ['Mixed', 'RAG & retrieval', 'Agents & tool use', 'Deployment & infra', 'Customer scenarios', 'Debugging & performance'],
     label: 'Forward Deployed Engineer',
     short: 'FDE',
     theme: { accent: '#22e3ff', accent2: '#3d7bff', bg1: '#06265e', bg2: '#04164a' },
@@ -36,6 +38,7 @@ Behaviour: For mock interviews, play the interviewer (or a realistic customer) a
   },
   {
     id: 'researcher',
+    quizTopics: ['Mixed', 'Transformers & attention', 'Optimization & training', 'RL & alignment', 'Probability & statistics', 'Experimental design'],
     label: 'AI Researcher',
     short: 'Researcher',
     theme: { accent: '#3dffb0', accent2: '#19b8ff', bg1: '#032f55', bg2: '#04204a' },

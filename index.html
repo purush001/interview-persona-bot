@@ -12,18 +12,27 @@
     <div class="bg-glow" aria-hidden="true"></div>
     <div class="bg-grid" aria-hidden="true"></div>
 
-    <main class="app" id="app">
-      <header class="app-header">
-        <h1>AI Interview Agent</h1>
-        <div class="header-actions">
-          <button id="clear-btn" class="ghost" title="Clear this conversation">Clear chat</button>
-          <button id="key-btn" class="ghost" title="Change API key">API key</button>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <header class="topbar-row">
+          <h1>AI Interview Agent</h1>
+          <div class="header-actions">
+            <button id="clear-btn" class="ghost" title="Clear this conversation">Clear chat</button>
+            <button id="key-btn" class="ghost" title="Change API key">API key</button>
+          </div>
+        </header>
+        <div class="topbar-row nav-row">
+          <nav class="jobs" id="jobs" aria-label="Select the role you are interviewing for"></nav>
+          <div class="modes" role="tablist" aria-label="Mode">
+            <button type="button" role="tab" id="mode-chat" class="mode active" data-mode="chat">💬 Chat</button>
+            <button type="button" role="tab" id="mode-quiz" class="mode" data-mode="quiz">🎯 Quiz</button>
+          </div>
         </div>
-      </header>
+      </div>
+    </div>
 
-      <nav class="jobs" id="jobs" aria-label="Select the role you are interviewing for"></nav>
-
-      <section class="chat" aria-live="polite">
+    <div class="app" id="app">
+      <section class="view chat" id="chat-view" aria-live="polite">
         <div class="messages" id="messages"></div>
         <div class="suggestions" id="suggestions"></div>
         <form class="composer" id="composer">
@@ -31,7 +40,11 @@
           <button type="submit" id="send" class="send">Send</button>
         </form>
       </section>
-    </main>
+
+      <section class="view quiz" id="quiz-view" hidden></section>
+    </div>
+
+    <button id="to-bottom" class="fab" title="Jump to latest" aria-label="Jump to latest" hidden>↓</button>
 
     <div class="modal" id="key-modal" hidden>
       <form class="modal-card" id="key-form">

@@ -75,3 +75,35 @@ export async function streamChat({ apiKey, system, history, onChunk, signal }) {
   if (!full) throw new Error(blocked ? `The request was blocked (${blocked}).` : 'The model returned an empty response.');
   return full;
 }
+
+/** One-shot JSON generation (non-streaming), constrained by a response schema. */
+export async function generateJson({ apiKey, system, prompt, schema, signal }) {
+  const res = await fetch(`${BASE}/${MODEL}:generateContent`, {
+    method: 'POST',
+    signal,
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.9, responseMimeType: 'application/json', responseSchema: schema },
+    }),
+  });
+  if (!res.ok) throw await errorFromResponse(res);
+  const json = await res.json();
+  const text = (json.candidates?.[0]?.content?.parts || [])
+    .filter((p) => !p.thought)
+    .map((p) => p.text || '')
+    .join('')
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '');
+  if (!text) {
+    const blocked = json.promptFeedback?.blockReason;
+    throw new Error(blocked ? `The request was blocked (${blocked}).` : 'The model returned an empty response.');
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('The model returned malformed data. Please try again.');
+  }
+}
