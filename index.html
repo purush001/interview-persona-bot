@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Interview Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <main class="app" id="app">
+      <header class="app-header">
+        <h1>AI Interview Agent</h1>
+        <div class="header-actions">
+          <button id="clear-btn" class="ghost" title="Clear this conversation">Clear chat</button>
+          <button id="key-btn" class="ghost" title="Change API key">API key</button>
+        </div>
+      </header>
+
+      <nav class="jobs" id="jobs" aria-label="Select the role you are interviewing for"></nav>
+
+      <section class="chat" aria-live="polite">
+        <div class="messages" id="messages"></div>
+        <div class="suggestions" id="suggestions"></div>
+        <form class="composer" id="composer">
+          <textarea id="input" rows="1" placeholder="Ask anything…" aria-label="Message"></textarea>
+          <button type="submit" id="send" class="send">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <div class="modal" id="key-modal" hidden>
+      <form class="modal-card" id="key-form">
+        <h2>Enter your Gemini API key</h2>
+        <p>
+          Get a free key from
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+          It is sent only to Google's Gemini API from your browser.
+        </p>
+        <input id="key-input" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" required />
+        <label class="remember">
+          <input type="checkbox" id="key-remember" />
+          Remember on this device (otherwise cleared when the tab closes)
+        </label>
+        <p class="error" id="key-error" hidden></p>
+        <div class="modal-actions">
+          <button type="button" id="key-cancel" class="ghost" hidden>Cancel</button>
+          <button type="submit" class="send">Start practising</button>
+        </div>
+      </form>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
