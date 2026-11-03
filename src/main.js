@@ -2,10 +2,15 @@ import './style.css';
 import { personas } from './personas.js';
 import { streamChat, MODEL } from './gemini.js';
 import { renderMarkdown } from './markdown.js';
+import { createQuiz } from './quiz.js';
 
 const $ = (id) => document.getElementById(id);
 const els = {
   jobs: $('jobs'),
+  chatView: $('chat-view'),
+  quizView: $('quiz-view'),
+  toBottom: $('to-bottom'),
+  modes: document.querySelectorAll('.mode'),
   messages: $('messages'),
   suggestions: $('suggestions'),
   composer: $('composer'),
@@ -39,6 +44,7 @@ const saveKey = (key, remember) =>
 
 let apiKey = loadKey();
 let activeId = personas[0].id;
+let mode = 'chat';
 
 // Per-persona conversation state, so each role keeps its own chat.
 const state = Object.fromEntries(
@@ -75,8 +81,36 @@ function selectPersona(id) {
   applyTheme(active());
   renderJobs();
   renderChat();
-  els.input.focus();
+  quiz.render();
+  window.scrollTo({ top: mode === 'chat' ? document.documentElement.scrollHeight : 0 });
+  if (mode === 'chat') els.input.focus();
 }
+
+/* ---------- mode (chat / quiz) ---------- */
+function setMode(next) {
+  mode = next;
+  els.chatView.hidden = mode !== 'chat';
+  els.quizView.hidden = mode !== 'quiz';
+  els.clear.hidden = mode !== 'chat';
+  els.modes.forEach((b) => {
+    const on = b.dataset.mode === mode;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+  if (mode === 'quiz') quiz.render();
+  window.scrollTo({ top: mode === 'chat' ? document.documentElement.scrollHeight : 0 });
+  updateFab();
+}
+els.modes.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+/* ---------- page scroll helpers ---------- */
+const distFromBottom = () => document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+function updateFab() {
+  els.toBottom.hidden = !(mode === 'chat' && distFromBottom() > 320);
+}
+window.addEventListener('scroll', updateFab, { passive: true });
+window.addEventListener('resize', updateFab);
+els.toBottom.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
 
 /* ---------- chat rendering ---------- */
 function bubbleEl(m) {
@@ -91,7 +125,7 @@ function bubbleEl(m) {
   return { row, b };
 }
 
-function renderChat() {
+function renderChat({ scroll = true } = {}) {
   const s = state[activeId];
   els.messages.innerHTML = '';
   s.messages.forEach((m) => {
@@ -99,7 +133,7 @@ function renderChat() {
     m.el = b;
     els.messages.appendChild(row);
   });
-  scrollDown();
+  if (scroll && mode === 'chat') scrollDown();
   renderSuggestions();
   els.send.disabled = s.busy;
 }
@@ -119,7 +153,7 @@ function renderSuggestions() {
 }
 
 const scrollDown = () => {
-  els.messages.scrollTop = els.messages.scrollHeight;
+  window.scrollTo({ top: document.documentElement.scrollHeight });
 };
 
 /* ---------- sending ---------- */
@@ -146,7 +180,7 @@ async function send(text) {
 
   const paint = () => {
     if (activeId !== persona.id || !reply.el) return;
-    const stick = els.messages.scrollHeight - els.messages.scrollTop - els.messages.clientHeight < 80;
+    const stick = distFromBottom() < 140;
     reply.el.innerHTML = reply.text ? renderMarkdown(reply.text) : '<span class="typing"><i></i><i></i><i></i></span>';
     if (stick) scrollDown();
   };
@@ -176,7 +210,12 @@ async function send(text) {
     reply.pending = false;
     s.busy = false;
     s.controller = null;
-    if (activeId === persona.id) renderChat();
+    if (activeId === persona.id) {
+      const y = window.scrollY;
+      const follow = distFromBottom() < 140;
+      renderChat({ scroll: follow });
+      if (!follow) window.scrollTo({ top: y });
+    }
   }
 }
 
@@ -226,10 +265,24 @@ els.keyForm.addEventListener('submit', (e) => {
   els.input.focus();
 });
 
+/* ---------- quiz ---------- */
+const quiz = createQuiz({
+  root: els.quizView,
+  personas,
+  getPersona: active,
+  getApiKey: () => apiKey,
+  onNeedKey: (cancellable, msg) => openKeyModal(cancellable, msg),
+  onDiscuss: (text) => {
+    setMode('chat');
+    send(text);
+  },
+});
+
 /* ---------- init ---------- */
 applyTheme(active());
 renderJobs();
 renderChat();
+setMode('chat');
 document.title = `AI Interview Agent`;
 els.input.title = `Model: ${MODEL}`;
 if (!apiKey) openKeyModal(false);
